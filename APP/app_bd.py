@@ -4,7 +4,8 @@ from functools import partial
 from tkinter import messagebox
 from customtkinter import *
 from PIL import Image, ImageTk
-import  os, csv, correo, pdf_app
+import  os, csv, correo, pdf_app, excel_app, base_local, eliminar_fila
+import modificar_linea as mod
 
 COUNT = 0
 DIR = os.path.realpath(__file__)
@@ -12,9 +13,60 @@ DIR = DIR.split("\\")
 DIR.pop(len(DIR)-1)
 DIR = "\\".join(DIR)
 
-def envia_excel():
+globals()["ESTADO"] = "CORREO"
+
+def acortador_2(boton : 'Label', barra_nav, boton_enviar_pdf : 'Label', boton_enviar_excel : 'Label', boton_opcion : 'Label', boton_1 : 'CTkButton', boton_2 : 'CTkButton', boton_3 : 'CTkButton', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', parm, parm_2, parm_3, modo, imagen):
     
-    messagebox.showinfo(title = "en desarrollo", message = "opcion en desarrollo")
+    boton.config(image = imagen)
+    boton.config(background = parm_2)
+    barra_nav.config(background = parm_2)
+    set_appearance_mode(modo)
+    
+    imagen_pdf = Image.open(DIR + "\\imagenes_00!1\\pdf" + parm + ".png")
+    imagen_pdf = imagen_pdf.resize((52,52))
+    imagen_pdf = ImageTk.PhotoImage(imagen_pdf) 
+    
+    imagen_pdf_2 = Image.open(DIR + "\\imagenes_00!1\\pdf_2" + parm + ".png")
+    imagen_pdf_2 = imagen_pdf_2.resize((50,50))
+    imagen_pdf_2 = ImageTk.PhotoImage(imagen_pdf_2) 
+    
+    imagen_excel = Image.open(DIR + "\\imagenes_00!1\\excel" + parm + ".png")
+    imagen_excel = imagen_excel.resize((55,36))
+    imagen_excel = ImageTk.PhotoImage(imagen_excel) 
+    
+    imagen_excel_2 = Image.open(DIR + "\\imagenes_00!1\\excel_2" + parm + ".png")
+    imagen_excel_2 = imagen_excel_2.resize((53,34))
+    imagen_excel_2 = ImageTk.PhotoImage(imagen_excel_2)
+    
+    imagen_correo = Image.open(DIR + "\\imagenes_00!1\\boton_correo" + parm + ".png")
+    imagen_correo = imagen_correo.resize((53,30))
+    imagen_correo = ImageTk.PhotoImage(imagen_correo)
+    
+    imagen_correo_1 = Image.open(DIR + "\\imagenes_00!1\\boton_local" + parm + ".png")
+    imagen_correo_1 = imagen_correo_1.resize((53,30))
+    imagen_correo_1 = ImageTk.PhotoImage(imagen_correo_1)
+        
+    boton_1.configure(text_color = parm_3)
+    boton_2.configure(text_color = parm_3)
+    boton_4.configure(text_color = parm_3)
+    boton_5.configure(text_color = parm_3)
+    boton_6.configure(text_color = parm_3)
+    try:
+        boton_3.configure(text_color = parm_3)
+    except:
+        pass
+    
+    boton_enviar_pdf.config(image = imagen_pdf)
+    boton_enviar_excel.config(image = imagen_excel)
+    boton_opcion.config(image = imagen_correo)
+        
+    boton_enviar_pdf.bind("<Enter>", partial(cambio_boton, boton_enviar_pdf, imagen_pdf, imagen_pdf_2))
+    boton_enviar_pdf.bind("<Leave>", partial(cambio_boton, boton_enviar_pdf, imagen_pdf, imagen_pdf_2))
+        
+    boton_enviar_excel.bind("<Enter>", partial(cambio_boton, boton_enviar_excel, imagen_excel, imagen_excel_2))
+    boton_enviar_excel.bind("<Leave>", partial(cambio_boton, boton_enviar_excel, imagen_excel, imagen_excel_2))
+        
+    boton_opcion.bind("<Button-1>", partial(cambio_boton, boton_opcion, imagen_correo, imagen_correo_1))
 
 def capturadora(captura : str, dir):
     
@@ -24,16 +76,64 @@ def capturadora(captura : str, dir):
         
     elif captura == "Error correo invalido" or captura == "correos o contraseñas equivocados.":
         
-        messagebox.e(title = "Error_Enviar_Correo", message = "programa desconfigurado, contacte con el desrollador.")
+        messagebox.showinfo(title = "Error_Enviar_Correo", message = "programa desconfigurado, contacte con el desrollador.")
         
     elif captura == "directorio no encontrado, revise el directorio.":
         
-        messagebox.e(title = "Error_Enviar_Correo", message = f"directorio no encontrado, revise el directorio. '{dir}'")
+        messagebox.showinfo(title = "Error_Enviar_Correo", message = f"directorio no encontrado, revise el directorio. '{dir}'")
     elif captura == "directorio corrupto.":
         
-        messagebox.e(title = "Error_Enviar_Correo", message = f"directorio corrupto. '{dir}'")
+        messagebox.showinfo(title = "Error_Enviar_Correo", message = f"directorio corrupto. '{dir}'")
     else:
         os.remove(dir)
+
+
+def enviar_excel_command( directorio_excel, directorio_csv, entrada_1 : 'CTkEntry', html_archivo):
+    
+    salida = entrada_1.get()
+    
+
+    if salida == "":
+        messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
+        
+    excel_app.converti_excel(directorio_csv, directorio_excel)
+        
+    captura = correo.enviar("excel", directorio_excel, salida, html_archivo)
+        
+    capturadora(captura, directorio_excel)
+    
+
+def envia_excel(tabla, dir_, event):
+    
+    dir = DIR + f"\\{tabla}.csv"
+    html_archivo = DIR + f"\\correo_excel.html"
+    
+    if globals()["ESTADO"] == "CORREO":
+        
+        app_3 = CTk()
+        app_3.geometry("400x150")
+        app_3.resizable(False, False)
+        app_3.title("Base de Datos")
+        
+        entrada_1 = CTkEntry(app_3, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
+        entrada_1.insert(0, "Ingrese su correo:")
+        entrada_1.bind("<FocusIn>", partial(marca_agua, entrada_1, 2))
+        entrada_1.bind("<FocusOut>", partial(marca_agua, entrada_1, 2))
+        entrada_1.bind("<Enter>", partial(border_1, entrada_1))
+        entrada_1.bind("<Leave>", partial(border_2, entrada_1))
+        entrada_1.pack(pady = 10, ipady = 7)
+
+        boton_2_ = CTkButton(app_3, text = "Enviar", width = 200, height = 65, command = partial(enviar_excel_command, dir, dir_, entrada_1, html_archivo, app_3))
+        boton_2_.pack(pady = 10)
+        app_3.mainloop()
+        
+    else:
+    
+        directorio = filedialog.asksaveasfilename()
+        directorio = directorio + f"_{tabla}.xlsx"
+        
+        excel_app.converti_excel(dir_, directorio)
+
 
 def enviar_pdf_command(dir, dir_, entrada : 'CTkEntry', html_archivo):
     
@@ -43,38 +143,89 @@ def enviar_pdf_command(dir, dir_, entrada : 'CTkEntry', html_archivo):
         messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
     
     pdf_app.crear_pdf(dir, dir_)
-    
+        
     captura = correo.enviar("pdf", dir, salida, html_archivo)
-    
+        
     capturadora(captura, dir)
 
 def envia_pdf(tabla, dir_, event):
     
     
-    dir = DIR + f"\\{tabla}.pdf"
+    dir = DIR + f"\\{tabla}.csv"
     html_archivo = DIR + f"\\correo_pdf.html"
 
-    app_2 = CTk()
-    app_2.geometry("400x150")
-    app_2.resizable(False, False)
-    app_2.title("Base de Datos")
-    
-    entrada_ = CTkEntry(app_2, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
-    entrada_.insert(0, "Ingrese su correo:")
-    entrada_.bind("<FocusIn>", partial(marca_agua, entrada_))
-    entrada_.bind("<FocusOut>", partial(marca_agua, entrada_))
-    entrada_.bind("<Enter>", partial(border_1, entrada_))
-    entrada_.bind("<Leave>", partial(border_2, entrada_))
-    entrada_.pack(pady = 10, ipady = 7)
+    if globals()["ESTADO"] == "CORREO":
 
+        app_2 = CTk()
+        app_2.geometry("400x150")
+        app_2.resizable(False, False)
+        app_2.title("Base de Datos")
         
-    boton_1_ = CTkButton(app_2, text = "Enviar", width = 200, height = 65, command = partial(enviar_pdf_command, dir, dir_, entrada_, html_archivo))
-    boton_1_.pack(pady = 10)
+        entrada_ = CTkEntry(app_2, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
+        entrada_.insert(0, "Ingrese su correo:")
+        entrada_.bind("<FocusIn>", partial(marca_agua, entrada_, 2))
+        entrada_.bind("<FocusOut>", partial(marca_agua, entrada_, 2))
+        entrada_.bind("<Enter>", partial(border_1, entrada_))
+        entrada_.bind("<Leave>", partial(border_2, entrada_))
+        entrada_.pack(pady = 10, ipady = 7)
+
+            
+        boton_1_ = CTkButton(app_2, text = "Enviar", width = 200, height = 65, command = partial(enviar_pdf_command, dir, dir_, entrada_, html_archivo))
+        boton_1_.pack(pady = 10)
+        
+        app_2.mainloop()
+        
+    else:
+        
+        directorio = filedialog.asksaveasfilename()
+        directorio = directorio + f"_{tabla}.pdf"
+        
+        pdf_app.crear_pdf(directorio, dir_)
+        
+        
+def borrar_base(tabla : 'ttk.Treeview', directorio, lista):
     
-    app_2.mainloop()
+    try:
+        id = tabla.selection()[0]
+    except IndexError:
+        messagebox.showinfo(title = "Errro", message = "seleccione una base.")
+    
+    db = tabla.item(id, option = "text")
+    
+    db = str(db).split("_")
+    
+    base = base_local.Data_Base(nombre = "mod", validacion = "gestion")
+    base.borrar_db(directorio = directorio, nombre = db[0], validacion = db[1])
+    
+    for i in lista:
+        tabla.delete(globals()[f"fila_{i}"])
+        
+    lista = []
+            
+    for i in os.listdir(directorio):
+                
+        if os.path.isdir(f"{directorio}/{i}") and i != "imagenes_00!1" and i != "APP":
+            lista.append(i)
+            
+    for i in lista:
+                    
+        globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
 
 
-def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview', boton_3 : 'CTkButton', boton_2 : 'CTkButton', boton_1 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def agregar_base(tabla : 'ttk.Treeview', lista, entrada_1 : 'CTkEntry', directorio):
+    
+    data = str(entrada_1.get())
+    
+    if "_" not in str(entrada_1.get()) or len(data.split("-")) > 2:
+        messagebox.showinfo(title = "Error", message = "Debe ingresar entre '_', el nombre y validacion de la base.")
+    else:
+        
+        base_local.Data_Base(nombre = data.split("_")[0], validacion = data.split("_")[1], directorio = directorio)
+        
+        globals()[f"fila_{data.split('_')[0]}"] = tabla.insert("", END, text = data)
+
+
+def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview', boton_3 : 'CTkButton', boton_2 : 'CTkButton', boton_1 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton',boton_6 : 'CTkButton'):
     
     try:
         if "base_local.py" in os.listdir(directorio):
@@ -88,7 +239,7 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
                 if os.path.isdir(f"{directorio}/{i}") and i != "imagenes_00!1" and i != "APP":
                     lista.append(i)
             
-            entrada.destroy()
+            entrada.pack_forget()
             boton_3.destroy()
             
             tabla = ttk.Treeview(main_label)
@@ -104,9 +255,11 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
                     
                 globals()[f"fila_{i}"] = tabla.insert("", END, text = i)               
             
-            tabla.place(x = 0, y = 0, width = 585, height = 374)
+            tabla.place(x = 0, y = 0, width = 585, height = 432)
             
-            boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel))
+            boton_4.configure(state = NORMAL, command = partial(borrar_base, tabla, directorio, lista))
+            
+            boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
             boton_2.configure(text = "Atras", command = partial(
                                                                 atras_1,
                                                                 tabla,
@@ -116,9 +269,20 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
                                                                 boton_2,
                                                                 main_label,
                                                                 app,
-                                                                boton_pdf
+                                                                boton_pdf,
+                                                                boton_excel,
+                                                                texto_1,
+                                                                boton_opcion,
+                                                                entrada_1,
+                                                                boton_4,
+                                                                boton_5,
+                                                                boton_6
                                                                 ))
-                
+            
+            entrada_1.configure(state = NORMAL, text_color = "gray")
+            entrada_1.insert(0, "Ingrese nombre:")
+            
+            boton_6.configure(state = NORMAL, command = partial(agregar_base, tabla, lista, entrada_1, directorio))            
         else:
             
             messagebox.showinfo(title = "Error", message = "Este no es el directorio de la base de datos.")
@@ -145,15 +309,18 @@ def fun_1():
     return text
 
 
-def comandos(boton_1 : 'CTkButton', boton_3 : 'CTkButton', entrada : 'CTkEntry', main_label : 'LabelFrame', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def comandos(boton_1 : 'CTkButton', boton_3 : 'CTkButton', entrada : 'CTkEntry', main_label : 'LabelFrame', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
-    boton_1.configure(command = partial(listar_db, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel))
-    boton_3.configure(command = partial(listar_db_buscador, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel))
+    boton_1.configure(command = partial(listar_db, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+    boton_3.configure(command = partial(listar_db_buscador, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
     
-def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_1 : 'CTkButton', directorio, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_1 : 'CTkButton', directorio, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', base, lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
             
     boton_pdf.place_forget()
     boton_excel.place_forget()
+    texto_1.place_forget()
+    boton_opcion.place_forget()
+    boton_1.configure(state = NORMAL)
             
     for i in range(len(lista)):
         
@@ -174,16 +341,196 @@ def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_
             boton_2,
             tabla,
             directorio, 
-            lista_,
+            lista__,
             yscrollbar, 
             xscrollbar,
             main_label,
             app, 
-            boton_pdf
+            boton_pdf,
+            boton_excel,
+            texto_1,
+            base,
+            boton_opcion,
+            entrada_1,
+            boton_4,
+            boton_5,
+            boton_6
             ))
 
 
-def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', boton_pdf : 'Button', boton_2 : 'CTkButton', boton_1 : 'CTkButton',  yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', boton_excel : Label):
+def borrar_linea(dir, tabla : 'ttk.Treeview' , lista):
+    
+    try:
+        index = 0
+        try:
+            id = tabla.selection()[0]
+        except IndexError:
+            messagebox.showinfo(title = "Error", message = "seleccione una fila.")
+        for i in range(len(lista)):
+            if str(id) == globals()[f"#{i}"]:
+                tabla.delete(globals()[f"#{i}"])
+                index = i 
+            
+        eliminar_fila.borrar_linea_pd(dir, index)
+        
+
+    except IndexError:
+        try:
+            
+            messagebox.showinfo(title = "Delimiter Error", message = f"El archivo no esta delimitado por comas, reviselo. '{dir}'")
+            
+        except UnboundLocalError:
+            
+            messagebox.showinfo(title = "Archivo Error", message = f"No selecciono ninguna tabla.")
+
+    except FileNotFoundError:
+        
+        messagebox.showinfo(title = "Archivo no encontrado", message = f"Revise el directorio. '{dir}.csv'")
+        
+    except IOError:
+        
+        messagebox.showinfo(title = "Archivo corrupto.", message = f"Archivo corrupto. '{dir}.csv'")
+
+
+def pedir_cambio(entrada_4 : 'CTkEntry', lista, lectura, boton_3_ : 'CTkButton', index, dir, tex_show : 'CTkLabel', count):  
+    
+    if " " in entrada_4.get():
+        messagebox.showerror(title = "Error", message = "no ingrese espacios, sustituyalo por guiones medios")
+        tex_show.configure(text = "Error")
+        boton_3_.configure(state = DISABLED)
+        
+        return
+    
+    lista = lista.split("-")
+    lista.pop(len(lista)-1)
+
+    if len(lista) < len(lectura):
+        
+        count += 1
+        
+        lista.append("")
+        lista = "-".join(lista)
+        lista += str(entrada_4.get()) + "-"
+        entrada_4.delete(0, END)
+        if count < len(lectura):
+            tex_show.configure(text = f"columna: {lectura[count]}")
+        elif count == len(lectura):
+            tex_show.configure(text = f"Listo!")
+            lista = lista.split("-")
+            lista.pop(len(lista)-1)
+                
+        boton_3_.configure(command = partial(pedir_cambio, entrada_4, lista, lectura, boton_3_, index, dir, tex_show, count))
+        
+    if type(lista) == list:
+        if len(lista) == len(lectura):
+            print(lista)
+            mod.modificar_linea(dir, lista, lectura, index)
+            boton_3_.configure(state = DISABLED)
+        
+
+def modificar_linea(lectura, tabla : 'ttk.Treeview', lista, dir):
+    
+    index = 0
+        
+    id = tabla.selection()[0]
+    
+    for i in range(len(lista)):
+        
+        if str(globals()[f"#{i}"]) == str(id):
+            index = i
+            
+    app_4 = CTk()
+    app_4.geometry("400x150")
+    app_4.resizable(False, False)
+    app_4.title("Base de Datos")
+    
+    tex_show = CTkLabel(app_4, text = f"columna: {lectura[0][0]}")
+    tex_show.pack()    
+    
+    entrada_4 = CTkEntry(app_4, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
+    entrada_4.insert(0, f"Ingrese modificacion:")
+    entrada_4.bind("<FocusIn>", partial(marca_agua, entrada_4, 4))
+    entrada_4.bind("<FocusOut>", partial(marca_agua, entrada_4, 4))
+    entrada_4.bind("<Enter>", partial(border_1, entrada_4))
+    entrada_4.bind("<Leave>", partial(border_2, entrada_4))
+    entrada_4.pack(pady = 10, ipady = 7)
+
+    texto = ""
+    count = 0
+    boton_3_ = CTkButton(app_4, text = "Enviar", width = 200, height = 65)
+    boton_3_.configure(command = partial(pedir_cambio, entrada_4, texto,lectura[0], boton_3_, index, dir, tex_show, count))
+    boton_3_.pack(pady = 10)
+    app_4.mainloop()
+        
+        
+def pedir_cambio_2(entrada_5 : 'CTkEntry', lista, lectura, boton_4_ : 'CTkButton', dir, tex_show : 'CTkLabel', count):
+    
+    if " " in entrada_5.get():
+        messagebox.showerror(title = "Error", message = "no ingrese espacios, sustituyalo por guiones medios")
+        tex_show.configure(text = "Error")
+        boton_4_.configure(state = DISABLED)
+        
+        return
+    
+    lista = lista.split("-")
+    lista.pop(len(lista)-1)
+
+    if len(lista) < len(lectura):
+        
+        count += 1
+        
+        lista.append("")
+        lista = "-".join(lista)
+        lista += str(entrada_5.get()) + "-"
+        entrada_5.delete(0, END)
+        if count < len(lectura):
+            tex_show.configure(text = f"columna: {lectura[count]}")
+        elif count == len(lectura):
+            tex_show.configure(text = f"Listo!")
+            lista = lista.split("-")
+            lista.pop(len(lista)-1)
+                
+        boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, lista,lectura, boton_4_, dir, tex_show, count))
+        
+    if type(lista) == list:
+        if len(lista) == len(lectura):
+            print(lista)
+            
+            with open(f"{dir}", "a", newline = "\n") as csv_file:
+                
+                escrito = csv.writer(csv_file, delimiter = ",", quotechar = "|", quoting = csv.QUOTE_MINIMAL)
+                escrito.writerow(lista)
+            
+            boton_4_.configure(state = DISABLED)
+        
+        
+def agregar_fila(lectura, tabla : 'ttk.Treeview', dir):
+    
+    app_5 = CTk()
+    app_5.geometry("400x150")
+    app_5.resizable(False, False)
+    app_5.title("Base de Datos")
+    
+    tex_show = CTkLabel(app_5, text = f"columna: {lectura[0][0]}")
+    tex_show.pack()    
+    
+    entrada_5 = CTkEntry(app_5, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
+    entrada_5.insert(0, f"Ingrese nombre:")
+    entrada_5.bind("<FocusIn>", partial(marca_agua, entrada_5, 3))
+    entrada_5.bind("<FocusOut>", partial(marca_agua, entrada_5, 3))
+    entrada_5.bind("<Enter>", partial(border_1, entrada_5))
+    entrada_5.bind("<Leave>", partial(border_2, entrada_5))
+    entrada_5.pack(pady = 10, ipady = 7)
+
+    texto = ""
+    count = 0
+    boton_4_ = CTkButton(app_5, text = "Enviar", width = 200, height = 65)
+    boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, texto, lectura[0], boton_4_, dir, tex_show, count))
+    boton_4_.pack(pady = 10)
+    app_5.mainloop()
+        
+
+def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', boton_pdf : 'Label', boton_2 : 'CTkButton', boton_1 : 'CTkButton',  yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', boton_excel : Label, texto_1 : 'CTkLabel', lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     try:
         lista = []
@@ -220,14 +567,14 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
                 for i in lectura:
                 
                     lista.append(i)
-                        
+
             tabla.config(columns = lista[0])    
             
             for i in range(len(lista[0])+1):
                 if i != 0:
-                    tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1]), stretch = NO)
+                    tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
                 else:
-                    tabla.column(f"#{i}", minwidth = 0, width = 50, stretch = NO)
+                    tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
 
             tabla.heading("#0", text = tabla_)  
             
@@ -245,14 +592,26 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
                 
                 globals()[f"#{i}"] = tabla.insert("", END, text = "", values = lista[i])
                 
-        boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel))
+        boton_1.configure(state = DISABLED)        
                 
-        boton_pdf.place(x = 430, y = 400)
+        boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel, texto_1, base, lista__, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+                
+        boton_pdf.place(x = 435, y = 507)
         boton_pdf.bind("<Button-1>", partial(envia_pdf, tabla_, dir))
         
-        boton_excel.place(x = 490, y = 408)
+        boton_excel.place(x = 495, y = 515)
         boton_excel.bind("<Button-1>", partial(envia_excel, tabla_, dir))
-                
+        
+        boton_opcion.place(x = 465, y = 567)
+        
+        texto_1.place(x = 455, y = 475)
+        
+        boton_4.configure(command = partial(borrar_linea, dir, tabla, lista))
+        boton_5.configure(state = NORMAL, command = partial(modificar_linea, list(lectura), tabla, lista, dir))
+        boton_6.configure(command = partial(agregar_fila, list(lectura), tabla, dir))
+        entrada_1.delete(0, END)
+        entrada_1.configure(state = DISABLED , fg_color = "#343638")
+        
         
     except IndexError:
         try:
@@ -261,7 +620,7 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
             
         except UnboundLocalError:
             
-            messagebox.showinfo(title = "Archivo Error", message = f"No selecciono ninguna tabla. '{directorio}/{base}/{tabla_}.csv'")
+            messagebox.showinfo(title = "Archivo Error", message = f"No selecciono ninguna tabla.")
 
     except FileNotFoundError:
         
@@ -272,7 +631,7 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
         messagebox.showinfo(title = "Archivo corrupto.", message = f"Archivo corrupto. '{directorio}/{base}/{tabla_}.csv'")
 
 
-def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview',directorio, lista, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : LabelFrame, app : 'Tk', boton_pdf : 'Button'):
+def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview',directorio, lista, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : LabelFrame, app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', base, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     tabla.destroy()
     yscrollbar.destroy()
@@ -291,9 +650,9 @@ def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview'
                     
         globals()[f"fila_{i}"] = tabla.insert("", END, text = i)               
             
-    tabla.place(x = 0, y = 0, width = 585, height = 374)
+    tabla.place(x = 0, y = 0, width = 585, height = 432)
     
-    boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf))
+    boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
     boton_2.configure(text = "Atras", command = partial(
                                                                 atras_1,
                                                                 tabla,
@@ -303,10 +662,71 @@ def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview'
                                                                 boton_2,
                                                                 main_label,
                                                                 app,
-                                                                boton_pdf
+                                                                boton_pdf,
+                                                                boton_excel,
+                                                                texto_1,
+                                                                boton_opcion,
+                                                                entrada_1, 
+                                                                boton_4, 
+                                                                boton_5,
+                                                                boton_6
                                                                 ))
 
-def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button', boton_2 : 'CTkButton', yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def borrar_tablas(tabla : 'ttk.Treeview', directorio, base, lista):
+    
+    base_ = base.split("_")
+    
+    try:
+        id = tabla.selection()[0]
+    except IndexError:
+        messagebox.showinfo(title = "Error", message = "seleccione una tabla.")
+        
+    base_1 = tabla.item(id, option = "text")
+    
+    base_datos = base_local.Data_Base(nombre = "mod", validacion = "gestion")
+    base_datos.borrar_tabla( directorio = directorio, nombre_base = base_[0], validacion = base_[1], nombre = base_1)
+    
+    for i in lista:
+                        
+        tabla.delete(globals()[f"fila_{i}"])
+        
+    lista = []
+    
+    for i in os.listdir(f"{directorio}/{base}"):    
+            extension = i.split(".")
+
+            if len(extension) > 1:
+                if extension[1] == "csv":
+                    lista.append(extension[0])
+                    
+    for i in lista:
+                        
+            globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
+
+
+def agregar_tabla(tabla : 'ttk.Treeview', directorio, base, lista, entrada_1 : 'CTkEntry'):
+    
+    if "_" not in directorio:
+        
+        messagebox.showerror(title = "Error", message = "Directorio corrupto.")
+    else:  
+        data = str(entrada_1.get())
+        
+        try:
+            with open(f"{directorio}/{base}/{data}_{directorio.split('_')[1]}.csv", "w") as csv_file:
+                
+                pass
+            
+            with open(f"{directorio}/{base}/{data}_{directorio.split('_')[1]}.txt", "w") as txt_file:
+                
+                pass
+            
+            globals()[f"fila_{data}"] = tabla.insert("", END, text = data + "_" + directorio.split('_')[1])
+        except:
+            
+            messagebox.showerror(title = "Error", message = "Error de lectura del sistema." )
+
+def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button', boton_2 : 'CTkButton', yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     try:
         
@@ -316,11 +736,12 @@ def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button'
         
         base = tabla.item(id, option = "text")
         
-        for i in os.listdir(f"{directorio}/{base}"):
+        for i in os.listdir(f"{directorio}/{base}"):    
             extension = i.split(".")
 
-            if extension[1] == "csv":
-                lista.append(extension[0])
+            if len(extension) > 1:
+                if extension[1] == "csv":
+                    lista.append(extension[0])
                 
         tabla.heading("#0", text = "tablas")
         
@@ -332,7 +753,7 @@ def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button'
                         
             globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
             
-        boton_1.configure(command = partial(abrir_tabla,tabla, directorio, base, lista, app, boton_pdf, boton_2, boton_1,  yscrollbar, xscrollbar, main_label, boton_excel))
+        boton_1.configure(command = partial(abrir_tabla,tabla, directorio, base, lista, app, boton_pdf, boton_2, boton_1,  yscrollbar, xscrollbar, main_label, boton_excel, texto_1, lista_, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
         boton_2.configure(text = "Atras", command = partial(
             atras_2,
             boton_1,
@@ -344,8 +765,19 @@ def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button'
             xscrollbar,
             main_label,
             app, 
-            boton_pdf
+            boton_pdf,
+            boton_excel,
+            texto_1,
+            base,
+            boton_opcion,
+            entrada_1,
+            boton_4,
+            boton_5,
+            boton_6
             ))
+        
+        boton_4.configure(command = partial(borrar_tablas, tabla, directorio, base, lista))
+        boton_6.configure(command = partial(agregar_tabla, tabla, directorio, base, lista, entrada_1))
 
     except FileNotFoundError:
         
@@ -362,7 +794,14 @@ def atras_1(
             boton_2 : 'CTkButton',
             main_label : 'LabelFrame',
             app : 'Tk',
-            boton_pdf : 'Button'
+            boton_pdf : 'Label',
+            boton_excel : 'Label',
+            texto_1 : 'CTkLabel',
+            boton_opcion : 'CTkLabel',
+            entrada_1 : 'CTkEntry',
+            boton_4 : 'CTkButton',
+            boton_5 : 'CTkButton',
+            boton_6 : 'CTkButton'
                     ):
     
     tabla.destroy()
@@ -370,19 +809,20 @@ def atras_1(
     yscrollbar.destroy()
     boton_1.destroy()
     boton_2.destroy()
+    entrada_1.delete(0, END)
     
     main_label.config(text = fun_1())
     
     entrada = CTkEntry(app, width = 250, font = ("arial", 15), justify = CENTER, text_color = "grey", border_width = 1)
     entrada.insert(0, "Ingrese el directorio:")
-    entrada.bind("<FocusIn>", partial(marca_agua, entrada))
-    entrada.bind("<FocusOut>", partial(marca_agua, entrada))
+    entrada.bind("<FocusIn>", partial(marca_agua, entrada, 1))
+    entrada.bind("<FocusOut>", partial(marca_agua, entrada, 1))
     entrada.bind("<Enter>", partial(border_1, entrada))
     entrada.bind("<Leave>", partial(border_2, entrada))
     entrada.pack(pady = 10, ipady = 7)
-    
+
     boton_3 = CTkButton(app, text = "Buscar Directorio", width = 20, height = 6)
-    boton_3.place(x = 10, y = 339)
+    boton_3.place(x = 450, y = 419)
     
     boton_1 = CTkButton(app, text = "Abrir", width = 200, height = 65)
     boton_1.pack(pady = 10)
@@ -390,16 +830,18 @@ def atras_1(
     boton_2 = CTkButton(app, text = "Salir", width = 200, height = 65, command = app.destroy)
     boton_2.pack(pady = 10)
     
-    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_pdf)
+    entrada_1.configure(state = DISABLED, fg_color = "#343638")
+    
+    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
             
-def listar_db(entrada : 'Entry', main_label : 'LabelFrame', boton_1 : 'Button', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def listar_db(entrada : 'Entry', main_label : 'LabelFrame', boton_1 : 'Button', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     directorio = entrada.get()
     
-    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel)
+    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
         
     
-def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 : 'CTkButton', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label'):
+def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 : 'CTkButton', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     info = filedialog.askdirectory()
     directorio = info.capitalize()
@@ -407,10 +849,10 @@ def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 
     if directorio == "":
         return "vacio"
     
-    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel)
+    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
         
         
-def marca_agua(entrada : 'CTkEntry', event):
+def marca_agua(entrada : 'CTkEntry', id, event):
     
     global COUNT
     
@@ -418,7 +860,7 @@ def marca_agua(entrada : 'CTkEntry', event):
     
     texto = entrada.get()
     
-    if texto == "Ingrese el directorio:" or texto == "Ingrese su correo:":
+    if texto == "Ingrese el directorio:" or texto == "Ingrese su correo:" or texto == "Ingrese modificacion:" or texto == "Ingrese nombre:":
         
         entrada.delete(0, END)
         entrada.configure(text_color = "black")
@@ -426,10 +868,15 @@ def marca_agua(entrada : 'CTkEntry', event):
     elif texto == "":
         
         entrada.configure(text_color = "gray")
-        entrada.insert(0, "Ingrese el directorio:")
+        if id == 1:
+            entrada.insert(0, "Ingrese el directorio:")
+        elif id == 2:
+            entrada.insert(0, "Ingrese su correo:")
+        elif id == 3:
+            entrada.insert(0, "Ingrese nombre:")
+        elif id == 4:
+            entrada.insert(0, "Ingrese modificacion:")
     else: 
-        
-        
         
         if str(event) == "<FocusIn event>":
             entrada.configure(text_color = "black")  
@@ -447,66 +894,119 @@ def marca_agua(entrada : 'CTkEntry', event):
         
 def border_1(entrada : 'CTkEntry', event):
     
-    entrada.configure(border_color = "#5499c7", border_width = 2)
+    if entrada._state == "normal":
     
-    string = str(entrada.focus_get())
-    
-    if len(string) > len(".!ctkentry.!entry") and string != "":
+        entrada.configure(border_color = "#5499c7", border_width = 2)
         
+        string = str(entrada.focus_get())
         
-        
-        for i in range(len(string) - len(".!ctkentry.!entry")):
+        if len(string) > len(".!ctkentry.!entry") and string != "":
             
-            string = list(string)
-            string.pop(len(string) - i - 8)
+            for i in range(len(string) - len(".!ctkentry.!entry")):
+                
+                string = list(string)
+                string.pop(len(string) - i - 8)
 
-    string = "".join(string)       
-
-    if string != ".!ctkentry.!entry":
+        string = "".join(string)       
         
-        entrada.configure(text_color = "#5499c7")
+        if string != ".!ctkentry.!entry" or str(entrada._is_focused) == "False" or str(entrada.winfo_name()) not in str(entrada.focus_displayof()):
+            
+            entrada.configure(text_color = "#5499c7")
+    else:
+        return
 
 
 def border_2(entrada : 'CTkEntry', event):
     
-    entrada.configure(border_color = "gray", border_width = 1)
-    
-    string = str(entrada.focus_get())
-    
-    if len(string) > len(".!ctkentry.!entry") and string != "":
+    if entrada._state == "normal":
+        entrada.configure(border_color = "gray", border_width = 1)
         
+        string = str(entrada.focus_get())
         
-        
-        for i in range(len(string) - len(".!ctkentry.!entry")):
+        if len(string) > len(".!ctkentry.!entry") and string != "":
             
-            string = list(string)
-            string.pop(len(string) - i - 8)
+            for i in range(len(string) - len(".!ctkentry.!entry")):
+                
+                string = list(string)
+                string.pop(len(string) - i - 8)
 
-    string = "".join(string)
-    
-    if string != ".!ctkentry.!entry":
+        string = "".join(string)
         
-        entrada.configure(text_color = "gray")
-        
-    elif string == ".!ctkentry.!entry":
-        
-        entrada.configure(text_color = "black")
+        if string != ".!ctkentry.!entry" or str(entrada._is_focused) == "False" or str(entrada.winfo_name()) not in str(entrada.focus_displayof()):
+            
+            entrada.configure(text_color = "gray")
+            
+        elif string == ".!ctkentry.!entry":
+            
+            entrada.configure(text_color = "black")
+    else:
+        return
     
     
 def cambio_boton(boton : 'Button', imagen_1, imagen_2, event):
-    
     
     if "Leave" in str(event):
         boton.config(image = imagen_1)   
     elif "Enter" in str(event):
         boton.config(image = imagen_2)
+    elif "ButtonPress" in str(event):  
+        
+        if str(boton["image"]) == str(imagen_1):
+            boton.config(image = imagen_2)
+            
+        elif str(boton["image"]) == str(imagen_2):
+            boton.config(image = imagen_1)         
+            
+        if str(boton) == ".!label3":
+            
+            if globals()["ESTADO"] == "CORREO":
+                globals()["ESTADO"] = "LOCAL"
+            elif globals()["ESTADO"] == "LOCAL":
+                globals()["ESTADO"] = "CORREO"
+                
+
+def cambio_tema(boton : 'Label', imagen_1, imagen_2, barra_nav, boton_enviar_pdf : 'Label', boton_enviar_excel : 'Label', boton_opcion : 'Label', boton_1 : 'CTkButton', boton_2 : 'CTkButton', boton_3 : 'CTkButton', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', event):
     
+    if str(boton["image"]) == str(imagen_1):
+    
+        acortador_2(boton, barra_nav, boton_enviar_pdf, boton_enviar_excel, boton_opcion, boton_1, boton_2, boton_3, boton_4, boton_5, boton_6, "_", "#ebebeb", "#2020dd", "Light", imagen_2)  
+        
+    elif str(boton["image"]) == str(imagen_2):
+        
+        acortador_2(boton, barra_nav, boton_enviar_pdf, boton_enviar_excel, boton_opcion, boton_1, boton_2, boton_3, boton_4, boton_5, boton_6, "", "#242424", "white", "Dark", imagen_1)
+        
+        
+def border_enter_button(boton : 'Label', event):
+    
+    if str(boton["image"]) == "pyimage1":
+        if "Enter" in str(event):
+            boton.config(border = 1, background = "gray")
+        elif "Leave" in str(event):
+            boton.config(border = 0, background = "#ebebeb")
+    elif str(boton["image"]) == "pyimage2":
+        if "Enter" in str(event):
+            boton.config(border = 1, background = "black")
+        elif "Leave" in str(event):
+            boton.config(border = 0, background = "#242424")
+        
+        
 def main():
     
     app = CTk()
-    app.geometry("600x560")
+    app.geometry("600x645")
     app.resizable(False, False)
     app.title("Base de Datos")
+    
+    barra_nav = LabelFrame(width = 300, height = 27, background = "#242424", border = 0)
+    barra_nav.pack(side = TOP)
+    
+    imagen_dia = Image.open(DIR + "\\imagenes_00!1\\dia.png")
+    imagen_dia = imagen_dia.resize((25,24))
+    imagen_dia = ImageTk.PhotoImage(imagen_dia)
+    
+    imagen_noche= Image.open(DIR + "\\imagenes_00!1\\nocturn.png")
+    imagen_noche = imagen_noche.resize((25,24))
+    imagen_noche = ImageTk.PhotoImage(imagen_noche)
     
     icono = Image.open(DIR + "\\imagenes_00!1\\icon.png")
     icono = icono.resize((120, 60))
@@ -515,17 +1015,19 @@ def main():
     
     main_label = LabelFrame(app, background = "black", width = 500, height = 300, text = fun_1(), foreground = "white", border = 0, labelanchor = "n", font = ("verdana", 12))
     main_label.pack(expand = True, fill= BOTH)
+    
+    texto_1 = CTkLabel(app, text = "exportar tabla")
 
     entrada = CTkEntry(app, width = 250, font = ("arial", 15), justify = CENTER, text_color = "gray", border_width = 1)
     entrada.insert(0, "Ingrese el directorio:")
-    entrada.bind("<FocusIn>", partial(marca_agua, entrada))
-    entrada.bind("<FocusOut>", partial(marca_agua, entrada))
+    entrada.bind("<FocusIn>", partial(marca_agua, entrada, 1))
+    entrada.bind("<FocusOut>", partial(marca_agua, entrada, 1))
     entrada.bind("<Enter>", partial(border_1, entrada))
     entrada.bind("<Leave>", partial(border_2, entrada))
     entrada.pack(pady = 10, ipady = 7)
     
     boton_3 = CTkButton(app, text = "Buscar Directorio", width = 20, height = 6)
-    boton_3.place(x = 35, y = 350)
+    boton_3.place(x = 450, y = 433)
     
     boton_1 = CTkButton(app, text = "Abrir", width = 200, height = 65)
     boton_1.pack(pady = 10)
@@ -548,6 +1050,14 @@ def main():
     imagen_excel_2 = Image.open(DIR + "\\imagenes_00!1\\excel_2.png")
     imagen_excel_2 = imagen_excel_2.resize((53,34))
     imagen_excel_2 = ImageTk.PhotoImage(imagen_excel_2)
+    
+    imagen_correo = Image.open(DIR + "\\imagenes_00!1\\boton_correo.png")
+    imagen_correo = imagen_correo.resize((53,30))
+    imagen_correo = ImageTk.PhotoImage(imagen_correo)
+    
+    imagen_correo_1 = Image.open(DIR + "\\imagenes_00!1\\boton_local.png")
+    imagen_correo_1 = imagen_correo_1.resize((53,30))
+    imagen_correo_1 = ImageTk.PhotoImage(imagen_correo_1)
                 
     boton_enviar_pdf = Label(app, image = imagen_pdf, background = "#242424", border = 0)
     boton_enviar_pdf.bind("<Enter>", partial(cambio_boton, boton_enviar_pdf, imagen_pdf, imagen_pdf_2))
@@ -557,7 +1067,37 @@ def main():
     boton_enviar_excel.bind("<Enter>", partial(cambio_boton, boton_enviar_excel, imagen_excel, imagen_excel_2))
     boton_enviar_excel.bind("<Leave>", partial(cambio_boton, boton_enviar_excel, imagen_excel, imagen_excel_2))
     
-    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_enviar_pdf, boton_enviar_excel)
+    boton_opcion = Label(app, image = imagen_correo, background = "#242424", border = 0)
+    boton_opcion.bind("<Button-1>", partial(cambio_boton, boton_opcion, imagen_correo, imagen_correo_1))
+    
+    cambio_color = Label(image = imagen_noche, border = 0, background = "#242424", width = 25, height = 25)
+    cambio_color.place(x = 0, y = 0)
+    
+    cambio_color.bind("<Enter>", partial(border_enter_button, cambio_color))
+    cambio_color.bind("<Leave>", partial(border_enter_button, cambio_color))
+    
+    texto_2 = CTkLabel(app, text = "modificaciones")
+    texto_2.place(x = 55, y = 475)
+    
+    entrada_1 = CTkEntry(app, width = 160, font = ("arial", 12), justify = CENTER, text_color = "gray", border_width = 1, state = DISABLED) 
+    entrada_1.insert(0, "Ingrese nombre:")
+    entrada_1.bind("<FocusIn>", partial(marca_agua, entrada_1, 3))
+    entrada_1.bind("<FocusOut>", partial(marca_agua, entrada_1, 3))
+    entrada_1.bind("<Enter>", partial(border_1, entrada_1))
+    entrada_1.bind("<Leave>", partial(border_2, entrada_1))
+    entrada_1.place(x = 20, y = 516) 
+    
+    boton_4 = CTkButton(app, text = "borrar", width = 67, height = 35, state = DISABLED)
+    boton_4.place(x = 27, y = 559)
+    
+    boton_5 = CTkButton(app, text = "modificar", width = 50, height = 35, state = DISABLED)
+    boton_5.place(x = 101, y = 559)
+    
+    boton_6 = CTkButton(app, text = "agregar", width = 63, height = 35, state = DISABLED)
+    boton_6.place(x = 64, y = 602)
+    
+    cambio_color.bind("<Button-1>", partial(cambio_tema, cambio_color, imagen_noche, imagen_dia, barra_nav, boton_enviar_pdf, boton_enviar_excel, boton_opcion, boton_1, boton_2, boton_3, boton_4, boton_5, boton_6))
+    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_enviar_pdf, boton_enviar_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
 
     app.mainloop()
     

@@ -55,6 +55,9 @@ def enviar(asunto, directorio, destinatario_, html_archivo):
                     contenido.set_payload(adjunto.read())
                     encoders.encode_base64(contenido)
                     
+                    directorio = directorio.split("\\")
+                    directorio = "tabla_" + directorio[len(directorio)-1]
+                    
                     #se configura el encabezado
                     contenido.add_header("Content-Disposition", f"attachment; filename = {directorio}", )
 
