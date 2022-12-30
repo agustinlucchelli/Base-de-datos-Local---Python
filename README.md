@@ -54,7 +54,7 @@ Para borrar una base de datos se usa la funcion bd.borrar_bd() la cual recive co
 
 
 ********************************************************************************************************************************************************************************
-                                                            ACTUALIZACION
+                                                         ACTUALIZACION
 ********************************************************************************************************************************************************************************
 
 1) se agregaron mejoras en el manejo de excepciones:
@@ -69,7 +69,7 @@ Para borrar una base de datos se usa la funcion bd.borrar_bd() la cual recive co
     2) fila = "desde-hacia", si solo se quiere borrar una linea, ingrese un solo numero respectivo sin el guion.
 
 ********************************************************************************************************************************************************************************
-                                                            Interface
+                                                         Interface
 ********************************************************************************************************************************************************************************
 
 La interface grafica se encuentra en la carpeta "APP", con el nombre de "app_bd.py", la cual proporciona una mirada mas cofortable de la informacion de las tablas.
