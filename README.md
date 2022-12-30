@@ -1,5 +1,3 @@
-# Base-de-datos-Local---Python
-Una base de datos que se maneja localmente en el equipo sin necesidad de usar SQL.
 Este modulo ofrece un algoritmo para el guardado de informacion en el entorno local, usando archivos "csv".
 
 El programa trabaja con archivos "csv" delimitados por comas.
@@ -54,12 +52,10 @@ Para borrar una tabla se usa el metodo bd.borrar_tabla(), el cual recive el nomb
 
 Para borrar una base de datos se usa la funcion bd.borrar_bd() la cual recive como parametro el nombre de la base de datos "nombre = "nombre""
 
---- En la carpeta APP esta "app_bd.py", que es la interface de visualizacion, solo sirve si en los directorios se encuentra la aplicacion de la base local
 
-
-************************************************************************************************************************************************
-                                                     ACTUALIZACION
-************************************************************************************************************************************************
+********************************************************************************************************************************************************************************
+                                                            ACTUALIZACION
+********************************************************************************************************************************************************************************
 
 1) se agregaron mejoras en el manejo de excepciones:
 
@@ -72,6 +68,12 @@ Para borrar una base de datos se usa la funcion bd.borrar_bd() la cual recive co
     1) nombre = "nombre_tabla"
     2) fila = "desde-hacia", si solo se quiere borrar una linea, ingrese un solo numero respectivo sin el guion.
 
-4) Ahora se debe agregar el directorio del "main.py" al inicializar la clase "Data_Base" para mejorar su movilidad local quedando asi:
+********************************************************************************************************************************************************************************
+                                                            Interface
+********************************************************************************************************************************************************************************
 
-    "db = Data_Base("directorio", nombre = "nombre_db", validacion = "validacion")"
+La interface grafica se encuentra en la carpeta "APP", con el nombre de "app_bd.py", la cual proporciona una mirada mas cofortable de la informacion de las tablas.
+
+Tambien ofrece la posibilidad de hacer una conversion de .csv a .pdf o .xslx, pudiendo guardar el archivo de forma local o exportarlo via mail (gmail).
+
+A la vez desde la interface se puede tanto agregar, eliminar o modificar elementos de la base de datos.
