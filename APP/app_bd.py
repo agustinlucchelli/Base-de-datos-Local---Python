@@ -14,6 +14,8 @@ DIR.pop(len(DIR)-1)
 DIR = "\\".join(DIR)
 
 globals()["ESTADO"] = "CORREO"
+globals()["lista_bases"] = []
+globals()["lista_filas"] = []
 
 def acortador_2(boton : 'Label', barra_nav, boton_enviar_pdf : 'Label', boton_enviar_excel : 'Label', boton_opcion : 'Label', boton_1 : 'CTkButton', boton_2 : 'CTkButton', boton_3 : 'CTkButton', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', parm, parm_2, parm_3, modo, imagen):
     
@@ -223,6 +225,8 @@ def agregar_base(tabla : 'ttk.Treeview', lista, entrada_1 : 'CTkEntry', director
         base_local.Data_Base(nombre = data.split("_")[0], validacion = data.split("_")[1], directorio = directorio)
         
         globals()[f"fila_{data.split('_')[0]}"] = tabla.insert("", END, text = data)
+        globals()["lista_bases"].append(globals()[f"fila_{data.split('_')[0]}"])
+        
 
 
 def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview', boton_3 : 'CTkButton', boton_2 : 'CTkButton', boton_1 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton',boton_6 : 'CTkButton'):
@@ -253,7 +257,7 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
             
             for i in lista:
                     
-                globals()[f"fila_{i}"] = tabla.insert("", END, text = i)               
+                globals()[f"fila_{i}"] = tabla.insert("", END, text = i)       
             
             tabla.place(x = 0, y = 0, width = 585, height = 432)
             
@@ -325,15 +329,20 @@ def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_
     for i in range(len(lista)):
         
         tabla.delete(globals()[f"#{i}"])   
-    for i in range(1, len(lista) + 1):  
+        
+    for i in range(1, len(lista[0]) + 1):  
         tabla.column(f"#{i}", width = 0)
-    
+
     tabla.column("#0", width = 585)
     tabla.heading("#0", text = "tablas") 
             
     for i in lista_:
                         
         globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
+        
+    for i in globals()["lista_filas"]:
+        
+        tabla.delete(i)
         
     boton_2.configure(command = partial(
             atras_2,
@@ -356,6 +365,8 @@ def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_
             boton_5,
             boton_6
             ))
+    
+    entrada_1.delete(0, END)
 
 
 def borrar_linea(dir, tabla : 'ttk.Treeview' , lista):
@@ -423,7 +434,6 @@ def pedir_cambio(entrada_4 : 'CTkEntry', lista, lectura, boton_3_ : 'CTkButton',
         
     if type(lista) == list:
         if len(lista) == len(lectura):
-            print(lista)
             mod.modificar_linea(dir, lista, lectura, index)
             boton_3_.configure(state = DISABLED)
         
@@ -463,7 +473,7 @@ def modificar_linea(lectura, tabla : 'ttk.Treeview', lista, dir):
     app_4.mainloop()
         
         
-def pedir_cambio_2(entrada_5 : 'CTkEntry', lista, lectura, boton_4_ : 'CTkButton', dir, tex_show : 'CTkLabel', count):
+def pedir_cambio_2(entrada_5 : 'CTkEntry', lista, lectura, boton_4_ : 'CTkButton', dir, tex_show : 'CTkLabel', count, tabla : 'ttk.Treeview'):
     
     if " " in entrada_5.get():
         messagebox.showerror(title = "Error", message = "no ingrese espacios, sustituyalo por guiones medios")
@@ -490,18 +500,19 @@ def pedir_cambio_2(entrada_5 : 'CTkEntry', lista, lectura, boton_4_ : 'CTkButton
             lista = lista.split("-")
             lista.pop(len(lista)-1)
                 
-        boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, lista,lectura, boton_4_, dir, tex_show, count))
-        
+        boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, lista,lectura, boton_4_, dir, tex_show, count, tabla))
     if type(lista) == list:
         if len(lista) == len(lectura):
-            print(lista)
-            
+ 
             with open(f"{dir}", "a", newline = "\n") as csv_file:
                 
                 escrito = csv.writer(csv_file, delimiter = ",", quotechar = "|", quoting = csv.QUOTE_MINIMAL)
                 escrito.writerow(lista)
             
             boton_4_.configure(state = DISABLED)
+
+                    
+            globals()["lista_filas"].append(tabla.insert("", END, text = "", values = lista))
         
         
 def agregar_fila(lectura, tabla : 'ttk.Treeview', dir):
@@ -525,7 +536,7 @@ def agregar_fila(lectura, tabla : 'ttk.Treeview', dir):
     texto = ""
     count = 0
     boton_4_ = CTkButton(app_5, text = "Enviar", width = 200, height = 65)
-    boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, texto, lectura[0], boton_4_, dir, tex_show, count))
+    boton_4_.configure(command = partial(pedir_cambio_2, entrada_5, texto, lectura[0], boton_4_, dir, tex_show, count, tabla))
     boton_4_.pack(pady = 10)
     app_5.mainloop()
         
@@ -533,91 +544,87 @@ def agregar_fila(lectura, tabla : 'ttk.Treeview', dir):
 def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', boton_pdf : 'Label', boton_2 : 'CTkButton', boton_1 : 'CTkButton',  yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', boton_excel : Label, texto_1 : 'CTkLabel', lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     try:
-        lista = []
-        
-        id = tabla.selection()[0]
-        
-        tabla_ = tabla.item(id, option = "text")
+            lista = []
+            id = tabla.selection()[0]
+            tabla_ = tabla.item(id, option = "text")
 
-        dir = f"{directorio}/{base}/{tabla_}.csv"
-        
-        with open(f"{directorio}/{base}/{tabla_}.csv") as archivo_csv:
+            dir = f"{directorio}/{base}/{tabla_}.csv"
             
-            parm = False
-            
-            lectura = csv.reader(archivo_csv)
-            lectura = list(lectura)
-            
-            for i in lectura:
+            with open(f"{directorio}/{base}/{tabla_}.csv") as archivo_csv:
                 
-                if len(i) != len(lectura[0]): 
-                    
-                    parm = True
+                parm = False
                 
+                lectura = csv.reader(archivo_csv)
+                lectura = list(lectura)
                 
-            if len(lectura[0]) == 1:
-                    
-                raise IndexError
-                
-            elif parm: 
-                    
-                messagebox.showinfo(title = "Archivo invalido.", message = f"Revise las cantidad de columnas en las lineas.. '{directorio}/{base}/{tabla_}.csv'")
-
-            else:
                 for i in lectura:
-                
-                    lista.append(i)
-
-            tabla.config(columns = lista[0])    
-            
-            for i in range(len(lista[0])+1):
-                if i != 0:
-                    tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
-                else:
-                    tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
-
-            tabla.heading("#0", text = tabla_)  
-            
-            for i in range(len(lista[0])):
-                
-                tabla.heading(f"#{i+1}", text = lista[0][i])
-            
-            for i in lista_:
+                    
+                    if len(i) != len(lectura[0]): 
                         
-                tabla.delete(globals()[f"fila_{i}"])
+                        parm = True
+                    
+                    
+                if len(lectura[0]) == 1:
+                        
+                    raise IndexError
+                    
+                elif parm: 
+                        
+                    messagebox.showinfo(title = "Archivo invalido.", message = f"Revise las cantidad de columnas en las lineas.. '{directorio}/{base}/{tabla_}.csv'")
+
+                else:
+                    for i in lectura:
+                    
+                        lista.append(i)
+
+                tabla.config(columns = lista[0])    
                 
-            lista.pop(0)
+                for i in range(len(lista[0])+1):
+                    if i != 0:
+                        tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
+                    else:
+                        tabla.column(f"#{i}", minwidth = 0, width = 50 + len(lista[0][i-1])*8, stretch = NO)
+
+                tabla.heading("#0", text = tabla_)  
+                
+                for i in range(len(lista[0])):
+                    
+                    tabla.heading(f"#{i+1}", text = lista[0][i])
+                
+                for i in lista_:
+                            
+                    tabla.delete(globals()[f"fila_{i}"])
+                    
+                lista.pop(0)
+                
+                for i in range(len(lista)):
+                    
+                    globals()[f"#{i}"] = tabla.insert("", END, text = "", values = lista[i])
+                
+            boton_1.configure(state = DISABLED)        
+                    
+            boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel, texto_1, base, lista__, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+                    
+            boton_pdf.place(x = 435, y = 507)
+            boton_pdf.bind("<Button-1>", partial(envia_pdf, tabla_, dir))
             
-            for i in range(len(lista)):
-                
-                globals()[f"#{i}"] = tabla.insert("", END, text = "", values = lista[i])
-                
-        boton_1.configure(state = DISABLED)        
-                
-        boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel, texto_1, base, lista__, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
-                
-        boton_pdf.place(x = 435, y = 507)
-        boton_pdf.bind("<Button-1>", partial(envia_pdf, tabla_, dir))
-        
-        boton_excel.place(x = 495, y = 515)
-        boton_excel.bind("<Button-1>", partial(envia_excel, tabla_, dir))
-        
-        boton_opcion.place(x = 465, y = 567)
-        
-        texto_1.place(x = 455, y = 475)
-        
-        boton_4.configure(command = partial(borrar_linea, dir, tabla, lista))
-        boton_5.configure(state = NORMAL, command = partial(modificar_linea, list(lectura), tabla, lista, dir))
-        boton_6.configure(command = partial(agregar_fila, list(lectura), tabla, dir))
-        entrada_1.delete(0, END)
-        entrada_1.configure(state = DISABLED , fg_color = "#343638")
+            boton_excel.place(x = 495, y = 515)
+            boton_excel.bind("<Button-1>", partial(envia_excel, tabla_, dir))
+            
+            boton_opcion.place(x = 465, y = 567)
+            
+            texto_1.place(x = 455, y = 475)
+            
+            boton_4.configure(command = partial(borrar_linea, dir, tabla, lista))
+            boton_5.configure(state = NORMAL, command = partial(modificar_linea, list(lectura), tabla, lista, dir))
+            boton_6.configure(command = partial(agregar_fila, list(lectura), tabla, dir))
+            entrada_1.delete(0, END)
+            entrada_1.configure(state = DISABLED , fg_color = "#343638")
         
         
     except IndexError:
         try:
-            
-            messagebox.showinfo(title = "Delimiter Error", message = f"El archivo no esta delimitado por comas, reviselo. '{directorio}/{base}/{tabla_}.csv'")
-            
+            messagebox.showinfo(title = "Delimiter Error", message = f"El archivo no esta delimitado por comas o esta corrupto, reviselo. '{directorio}/{base}/{tabla_}.csv'")
         except UnboundLocalError:
             
             messagebox.showinfo(title = "Archivo Error", message = f"No selecciono ninguna tabla.")
@@ -671,6 +678,8 @@ def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview'
                                                                 boton_5,
                                                                 boton_6
                                                                 ))
+    
+    entrada_1.delete(0, END)
 
 def borrar_tablas(tabla : 'ttk.Treeview', directorio, base, lista):
     
@@ -729,53 +738,59 @@ def agregar_tabla(tabla : 'ttk.Treeview', directorio, base, lista, entrada_1 : '
 def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button', boton_2 : 'CTkButton', yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
     
     try:
-        
+
         lista = []
-        
+            
         id = tabla.selection()[0]
-        
+            
         base = tabla.item(id, option = "text")
-        
+            
         for i in os.listdir(f"{directorio}/{base}"):    
             extension = i.split(".")
 
             if len(extension) > 1:
                 if extension[1] == "csv":
                     lista.append(extension[0])
-                
+                    
         tabla.heading("#0", text = "tablas")
-        
+            
         for i in lista_:
-                        
+                            
             tabla.delete(globals()[f"fila_{i}"])
             
+        if len(globals()["lista_bases"]) != 0:
+            for i in globals()["lista_bases"]:        
+                    
+                tabla.delete(i)
+                
+                
         for i in lista:
-                        
+                            
             globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
             
         boton_1.configure(command = partial(abrir_tabla,tabla, directorio, base, lista, app, boton_pdf, boton_2, boton_1,  yscrollbar, xscrollbar, main_label, boton_excel, texto_1, lista_, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
         boton_2.configure(text = "Atras", command = partial(
-            atras_2,
-            boton_1,
-            boton_2,
-            tabla,
-            directorio, 
-            lista_,
-            yscrollbar, 
-            xscrollbar,
-            main_label,
-            app, 
-            boton_pdf,
-            boton_excel,
-            texto_1,
-            base,
-            boton_opcion,
-            entrada_1,
-            boton_4,
-            boton_5,
-            boton_6
-            ))
-        
+                atras_2,
+                boton_1,
+                boton_2,
+                tabla,
+                directorio, 
+                lista_,
+                yscrollbar, 
+                xscrollbar,
+                main_label,
+                app, 
+                boton_pdf,
+                boton_excel,
+                texto_1,
+                base,
+                boton_opcion,
+                entrada_1,
+                boton_4,
+                boton_5,
+                boton_6
+                ))
+            
         boton_4.configure(command = partial(borrar_tablas, tabla, directorio, base, lista))
         boton_6.configure(command = partial(agregar_tabla, tabla, directorio, base, lista, entrada_1))
 
