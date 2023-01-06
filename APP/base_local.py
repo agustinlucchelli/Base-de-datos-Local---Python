@@ -22,7 +22,7 @@ def leer(nombre, directorio):
                     
 
         except IndexError:
-            print("El archivo no esta delimitado por comas, reviselo. '{directorio}\\{nombre}.csv'")
+            print("El archivo no esta delimitado por comas, reviselo. o esta vacia'{directorio}\\{nombre}.csv'")
 
         except FileNotFoundError:
             print(f"Archivo no encontrado, revise el directorio. '{directorio}\\{nombre}.csv'")

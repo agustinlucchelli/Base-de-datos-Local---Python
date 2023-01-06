@@ -1,12 +1,41 @@
+#!/usr/bin/env python
+
 from tkinter import *
 from tkinter import ttk
 from functools import partial
 from tkinter import messagebox
 from customtkinter import *
 from PIL import Image, ImageTk
-import  os, csv, correo, pdf_app, excel_app, base_local, eliminar_fila
+import  os, csv, correo, pdf_app, excel_app, base_local, eliminar_fila, cripto
 import modificar_linea as mod
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+def validacion_correos(correo_entrante) -> bool:
+    
+    parm = False
+    correo.leer_correo()
+    try:
+        with open(f"{BASE_DIR}\\APP\\Envio_csv\\tabla_correo.csv", newline = "") as csv_info:
+                
+            informacion = csv.reader(csv_info, dialect = "excel", delimiter = ",")
+            informacion = list(informacion)
+
+    except FileNotFoundError:
+            print(f"Archivo no encontrado, revise el directorio. 'Envio_csv\\tabla_correo.csv'")
+        
+    except IOError:
+            print(f"Archivo corrupto. 'Envio_csv\\tabla_correo.csv'")
+
+    info = list(informacion)
+    
+    for i in range(1, len(info)):
+        
+        if cripto.desencriptar(info[i][0]) == correo_entrante:
+            parm = True
+    return parm
+    
 COUNT = 0
 DIR = os.path.realpath(__file__)
 DIR = DIR.split("\\")
@@ -94,16 +123,23 @@ def enviar_excel_command( directorio_excel, directorio_csv, entrada_1 : 'CTkEntr
     
     salida = entrada_1.get()
     
+    validacion = validacion_correos(salida)
+    if validacion:
 
-    if salida == "":
-        messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
+        if salida == "":
+            messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
+            
+        excel_app.converti_excel(directorio_csv, directorio_excel)
+            
+        captura = correo.enviar("excel", directorio_excel, salida, html_archivo)
+            
+        capturadora(captura, directorio_excel)
+    else:
         
-    excel_app.converti_excel(directorio_csv, directorio_excel)
-        
-    captura = correo.enviar("excel", directorio_excel, salida, html_archivo)
-        
-    capturadora(captura, directorio_excel)
-    
+       parm = messagebox.askokcancel("Redirect","Mail no valiado, desea validarlo?")
+       if parm:
+           os.system("start https://devcop.pythonanywhere.com")
+           
 
 def envia_excel(tabla, dir_, event):
     
@@ -125,7 +161,7 @@ def envia_excel(tabla, dir_, event):
         entrada_1.bind("<Leave>", partial(border_2, entrada_1))
         entrada_1.pack(pady = 10, ipady = 7)
 
-        boton_2_ = CTkButton(app_3, text = "Enviar", width = 200, height = 65, command = partial(enviar_excel_command, dir, dir_, entrada_1, html_archivo, app_3))
+        boton_2_ = CTkButton(app_3, text = "Enviar", width = 200, height = 65, command = partial(enviar_excel_command, dir, dir_, entrada_1, html_archivo))
         boton_2_.pack(pady = 10)
         app_3.mainloop()
         
@@ -141,14 +177,23 @@ def enviar_pdf_command(dir, dir_, entrada : 'CTkEntry', html_archivo):
     
     salida = entrada.get()
     
-    if salida == "":
-        messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
+    validacion = validacion_correos(salida)
+    if validacion:
+        if salida == "":
+            messagebox.showinfo(title = "Error", message = "No se ingrese ningun correo.")
+        
+        pdf_app.crear_pdf(dir, dir_)
+            
+        captura = correo.enviar("pdf", dir, salida, html_archivo)
+            
+        capturadora(captura, dir)
+    else:
+        
+       parm = messagebox.askokcancel("Redirect","Mail no valiado, desea validarlo?")
+       if parm:
+           os.system("start https://devcop.pythonanywhere.com")
+           
     
-    pdf_app.crear_pdf(dir, dir_)
-        
-    captura = correo.enviar("pdf", dir, salida, html_archivo)
-        
-    capturadora(captura, dir)
 
 def envia_pdf(tabla, dir_, event):
     
