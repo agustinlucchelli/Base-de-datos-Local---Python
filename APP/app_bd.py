@@ -274,13 +274,13 @@ def agregar_base(tabla : 'ttk.Treeview', lista, entrada_1 : 'CTkEntry', director
         
 
 
-def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview', boton_3 : 'CTkButton', boton_2 : 'CTkButton', boton_1 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton',boton_6 : 'CTkButton'):
+def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview', boton_3 : 'CTkButton', boton_2 : 'CTkButton', boton_1 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton',boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     try:
         if "base_local.py" in os.listdir(directorio):
             
-            main_label.config(text = "")
-    
+            v.pack_forget()
+            
             lista = []
             
             for i in os.listdir(directorio):
@@ -308,7 +308,7 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
             
             boton_4.configure(state = NORMAL, command = partial(borrar_base, tabla, directorio, lista))
             
-            boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+            boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
             boton_2.configure(text = "Atras", command = partial(
                                                                 atras_1,
                                                                 tabla,
@@ -325,7 +325,8 @@ def acortador_1(directorio, main_label : 'LabelFrame', entrada : 'ttk.Treeview',
                                                                 entrada_1,
                                                                 boton_4,
                                                                 boton_5,
-                                                                boton_6
+                                                                boton_6,
+                                                                v
                                                                 ))
             
             entrada_1.configure(state = NORMAL, text_color = "gray")
@@ -349,21 +350,21 @@ def fun_1():
     
     archivos = os.listdir()
     
-    text = "ARCHIVOS DIRECTORIO ACTUAL: \n\n"
+    text = "\n                      ARCHIVOS DIRECTORIO ACTUAL: \n\n"   
     
     for i in archivos:
         
-        text += f"{i}\n"
+        text += f"  {i}\n"
         
     return text
 
 
-def comandos(boton_1 : 'CTkButton', boton_3 : 'CTkButton', entrada : 'CTkEntry', main_label : 'LabelFrame', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def comandos(boton_1 : 'CTkButton', boton_3 : 'CTkButton', entrada : 'CTkEntry', main_label : 'LabelFrame', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
-    boton_1.configure(command = partial(listar_db, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
-    boton_3.configure(command = partial(listar_db_buscador, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+    boton_1.configure(command = partial(listar_db, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
+    boton_3.configure(command = partial(listar_db_buscador, entrada, main_label, boton_1, boton_3, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
     
-def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_1 : 'CTkButton', directorio, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', base, lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_1 : 'CTkButton', directorio, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', base, lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
             
     boton_pdf.place_forget()
     boton_excel.place_forget()
@@ -408,7 +409,8 @@ def atras_3(boton_2 : 'CTkButton', tabla : 'ttk.Treeview', lista_, lista, boton_
             entrada_1,
             boton_4,
             boton_5,
-            boton_6
+            boton_6,
+            v
             ))
     
     entrada_1.delete(0, END)
@@ -586,7 +588,7 @@ def agregar_fila(lectura, tabla : 'ttk.Treeview', dir):
     app_5.mainloop()
         
 
-def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', boton_pdf : 'Label', boton_2 : 'CTkButton', boton_1 : 'CTkButton',  yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', boton_excel : Label, texto_1 : 'CTkLabel', lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', boton_pdf : 'Label', boton_2 : 'CTkButton', boton_1 : 'CTkButton',  yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', boton_excel : Label, texto_1 : 'CTkLabel', lista__, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     try:
             lista = []
@@ -648,7 +650,7 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
                 
             boton_1.configure(state = DISABLED)        
                     
-            boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel, texto_1, base, lista__, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+            boton_2.configure(command = partial(atras_3, boton_2, tabla, lista_, lista, boton_1, directorio, yscrollbar, xscrollbar, main_label , app, boton_pdf, boton_excel, texto_1, base, lista__, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
                     
             boton_pdf.place(x = 435, y = 507)
             boton_pdf.bind("<Button-1>", partial(envia_pdf, tabla_, dir))
@@ -683,7 +685,7 @@ def abrir_tabla(tabla : 'ttk.Treeview', directorio, base, lista_, app : 'Tk', bo
         messagebox.showinfo(title = "Archivo corrupto.", message = f"Archivo corrupto. '{directorio}/{base}/{tabla_}.csv'")
 
 
-def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview',directorio, lista, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : LabelFrame, app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', base, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview',directorio, lista, yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : LabelFrame, app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', base, boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     tabla.destroy()
     yscrollbar.destroy()
@@ -704,7 +706,7 @@ def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview'
             
     tabla.place(x = 0, y = 0, width = 585, height = 432)
     
-    boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+    boton_1.configure(command = partial(listar_tablas, tabla, directorio, lista, boton_1, boton_2, yscrollbar, xscrollbar, main_label, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
     boton_2.configure(text = "Atras", command = partial(
                                                                 atras_1,
                                                                 tabla,
@@ -721,7 +723,8 @@ def atras_2(boton_1 : 'CTkButton', boton_2 : 'CTkButton', tabla : 'ttk.Treeview'
                                                                 entrada_1, 
                                                                 boton_4, 
                                                                 boton_5,
-                                                                boton_6
+                                                                boton_6,
+                                                                v
                                                                 ))
     
     entrada_1.delete(0, END)
@@ -780,7 +783,7 @@ def agregar_tabla(tabla : 'ttk.Treeview', directorio, base, lista, entrada_1 : '
             
             messagebox.showerror(title = "Error", message = "Error de lectura del sistema." )
 
-def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button', boton_2 : 'CTkButton', yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button', boton_2 : 'CTkButton', yscrollbar : 'ttk.Scrollbar', xscrollbar : 'ttk.Scrollbar', main_label : 'LabelFrame', app : 'Tk', boton_pdf : 'Label', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     try:
 
@@ -813,7 +816,7 @@ def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button'
                             
             globals()[f"fila_{i}"] = tabla.insert("", END, text = i)
             
-        boton_1.configure(command = partial(abrir_tabla,tabla, directorio, base, lista, app, boton_pdf, boton_2, boton_1,  yscrollbar, xscrollbar, main_label, boton_excel, texto_1, lista_, boton_opcion, entrada_1, boton_4, boton_5, boton_6))
+        boton_1.configure(command = partial(abrir_tabla,tabla, directorio, base, lista, app, boton_pdf, boton_2, boton_1,  yscrollbar, xscrollbar, main_label, boton_excel, texto_1, lista_, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v))
         boton_2.configure(text = "Atras", command = partial(
                 atras_2,
                 boton_1,
@@ -833,7 +836,8 @@ def listar_tablas(tabla : 'ttk.Treeview', directorio, lista_, boton_1 : 'Button'
                 entrada_1,
                 boton_4,
                 boton_5,
-                boton_6
+                boton_6,
+                v
                 ))
             
         boton_4.configure(command = partial(borrar_tablas, tabla, directorio, base, lista))
@@ -861,7 +865,8 @@ def atras_1(
             entrada_1 : 'CTkEntry',
             boton_4 : 'CTkButton',
             boton_5 : 'CTkButton',
-            boton_6 : 'CTkButton'
+            boton_6 : 'CTkButton',
+            v : 'ttk.Scrollbar'
                     ):
     
     tabla.destroy()
@@ -871,7 +876,7 @@ def atras_1(
     boton_2.destroy()
     entrada_1.delete(0, END)
     
-    main_label.config(text = fun_1())
+    v.pack(fill = "y", side = RIGHT)
     
     entrada = CTkEntry(app, width = 250, font = ("arial", 15), justify = CENTER, text_color = "grey", border_width = 1)
     entrada.insert(0, "Ingrese el directorio:")
@@ -892,16 +897,16 @@ def atras_1(
     
     entrada_1.configure(state = DISABLED, fg_color = "#343638")
     
-    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
+    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v)
             
-def listar_db(entrada : 'Entry', main_label : 'LabelFrame', boton_1 : 'Button', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def listar_db(entrada : 'Entry', main_label : 'LabelFrame', boton_1 : 'Button', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     directorio = entrada.get()
     
-    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
+    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v)
         
     
-def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 : 'CTkButton', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton'):
+def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 : 'CTkButton', boton_3 : 'CTkButton', boton_2 : 'CTkButton', app : 'Tk', boton_pdf : 'Button', boton_excel : 'Label', texto_1 : 'CTkLabel', boton_opcion : 'CTkLabel', entrada_1 : 'CTkEntry', boton_4 : 'CTkButton', boton_5 : 'CTkButton', boton_6 : 'CTkButton', v : 'ttk.Scrollbar'):
     
     info = filedialog.askdirectory()
     directorio = info.capitalize()
@@ -909,7 +914,7 @@ def listar_db_buscador(entrada : 'CTkEntry', main_label : 'LabelFrame', boton_1 
     if directorio == "":
         return "vacio"
     
-    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
+    acortador_1(directorio, main_label, entrada, boton_3, boton_2, boton_1, app, boton_pdf, boton_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v)
         
         
 def marca_agua(entrada : 'CTkEntry', id, event):
@@ -1073,8 +1078,15 @@ def main():
     icono = ImageTk.PhotoImage(icono)
     app.call("wm", "iconphoto", app._w, icono)
     
-    main_label = LabelFrame(app, background = "black", width = 500, height = 300, text = fun_1(), foreground = "white", border = 0, labelanchor = "n", font = ("verdana", 12))
-    main_label.pack(expand = True, fill= BOTH)
+    main_label= Text(app, height=400, width=300, background = "black", fg = "white")
+    main_label.pack(fill = BOTH, expand = True) 
+    main_label.insert(INSERT, fun_1())
+    main_label.config(state = DISABLED)
+    
+    v = ttk.Scrollbar(main_label, orient='vertical', command = main_label.yview)
+    v.pack(side=RIGHT, fill='y')
+    
+    main_label.configure(yscrollcommand=v.set)
     
     texto_1 = CTkLabel(app, text = "exportar tabla")
 
@@ -1157,7 +1169,7 @@ def main():
     boton_6.place(x = 64, y = 602)
     
     cambio_color.bind("<Button-1>", partial(cambio_tema, cambio_color, imagen_noche, imagen_dia, barra_nav, boton_enviar_pdf, boton_enviar_excel, boton_opcion, boton_1, boton_2, boton_3, boton_4, boton_5, boton_6))
-    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_enviar_pdf, boton_enviar_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6)
+    comandos(boton_1, boton_3, entrada, main_label, boton_2, app, boton_enviar_pdf, boton_enviar_excel, texto_1, boton_opcion, entrada_1, boton_4, boton_5, boton_6, v)
 
     app.mainloop()
     
